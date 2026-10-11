@@ -1,0 +1,55 @@
+plugins {
+	id 'fabric-loom' version "${loom_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+	// MCEF Modern (JCEF / Chromium)
+	maven {
+		url = uri('https://maven.dimaskama.net/releases')
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// Встроенный браузер (нужен и для компиляции, и для runClient)
+	modImplementation "net.dimaskama:mcef-modern:${project.mcef_modern_version}"
+
+	// Java-API Chromium (пакеты org.cef.*): MCEF не отдаёт их транзитивно, нужны для компиляции.
+	// Версия должна совпадать с jcef в версии MCEF (jcef146.0.10 -> 146.0.10). Maven Central.
+	implementation "me.friwi:jcefmaven:${project.jcefmaven_version}"
+	// Сами классы org.cef.* лежат в jcef-api; указываем явно, чтобы не зависеть от транзитивности
+	implementation "me.friwi:jcef-api:${project.jcef_api_version}"
+}
+
+processResources {
+	inputs.property "version", project.version
+	filesMatching("fabric.mod.json") {
+		expand "version": inputs.properties.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 21
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+// Тесты проекта написаны как обычные main-программы (без JUnit), поэтому Gradle не находит в них тестов.
+// Без этой настройки задача test (а с ней и build) падает.
+tasks.withType(Test).configureEach {
+	failOnNoDiscoveredTests = false
+}

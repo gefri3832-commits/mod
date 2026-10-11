@@ -1,0 +1,6 @@
+{
+	"key.multitool.open": "Открыть MultiTool",
+	"key.multitool.toggle_hud": "Показать/скрыть закреплённые окна",
+	"key.multitool.dismiss_alerts": "Закрыть сигналы будильника и таймера",
+	"key.category.multitool.main": "MultiTool Overlay"
+}
